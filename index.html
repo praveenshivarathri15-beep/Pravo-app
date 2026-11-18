@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="te">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#6b2f16">
+<title>PRAVO</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{--brown:#6b2f16;--cream:#fff8ed;--gold:#f3b33d}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:var(--cream);color:#2b211b}
+header{background:var(--brown);color:white;padding:22px 16px;text-align:center}
+header h1{margin:0;font-size:27px;letter-spacing:1px}header p{margin:6px 0 0;font-size:13px}
+main{max-width:760px;margin:auto;padding:14px}
+.notice{background:#fff0cf;padding:12px;border-radius:12px;font-size:13px;margin-bottom:14px}
+h2{font-size:18px;margin:20px 0 10px;color:var(--brown)}
+.item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:white;padding:12px;border-radius:12px;margin:8px 0;box-shadow:0 1px 4px #0000000c}
+.item strong{display:block}.price{font-weight:700;color:var(--brown);white-space:nowrap}
+.controls{display:flex;align-items:center;gap:8px}.controls button{border:0;background:var(--brown);color:white;border-radius:9px;width:32px;height:32px;font-size:20px}
+.qty{min-width:16px;text-align:center}
+.cart{background:white;border-radius:14px;padding:14px;margin:18px 0;box-shadow:0 2px 8px #00000012}
+input,textarea,select{width:100%;padding:12px;border:1px solid #ddd;border-radius:9px;font:inherit;margin:6px 0 10px;background:white}
+.primary{width:100%;border:0;border-radius:12px;background:#168447;color:white;padding:15px;font-size:16px;font-weight:700}
+.muted{color:#756a62;font-size:12px}.total{font-size:20px;font-weight:800;color:var(--brown)}
+footer{text-align:center;padding:20px;color:#756a62;font-size:12px}
+</style>
+</head>
+<body>
+<header><h1>🍵 PRAVO</h1><p>Order Easy, Eat Happy</p></header>
+<main>
+<div class="notice">మీకు కావలసిన items ఎంచుకుని ఆర్డర్ పంపండి. మీ ఆర్డర్ WhatsApp ద్వారా షాప్‌కు వస్తుంది.</div>
+<div id="menu"></div>
+<section class="cart">
+<h2>🛒 Your Order</h2>
+<div id="cartItems" class="muted">ఇంకా items ఎంచుకోలేదు.</div>
+<div class="total" id="total">Total: ₹0</div>
+<h2>Delivery Details</h2>
+<input id="customer" placeholder="మీ పేరు" autocomplete="name">
+<input id="phone" placeholder="మీ మొబైల్ నంబర్" inputmode="tel">
+<textarea id="address" rows="2" placeholder="Delivery address / landmark"></textarea>
+<select id="delivery"><option value="Delivery">Home Delivery</option><option value="Pickup">Shop Pickup</option></select>
+<button class="primary" onclick="sendOrder()">WhatsApp ద్వారా Order పంపండి</button>
+<p class="muted">Delivery availability మరియు charges షాప్ ద్వారా నిర్ధారించబడతాయి.</p>
+</section>
+</main>
+<footer>PRAVO • Opposite Jothi Nagar, near CHC Government Hospital, Husnabad</footer>
+<script>
+const groups = [
+["Tea & Coffee",[["Tea",15],["Ginger Tea",20],["Elaichi Tea",25],["Ginger Elaichi Tea",30],["Coffee",25],["Black Coffee",20]]],
+["Other Drinks",[["Lemon Tea",25],["Green Tea",25],["Plain Lassi",40],["Mango Lassi",50],["Strawberry Lassi",50],["Special Lassi with Ice Cream",60]]],
+["Maggi & Snacks",[["Samosa (4 pcs)",20],["Plain Maggi",35],["Paneer Maggi",40],["Schezwan Maggi",40],["Veg & Corn Maggi",50],["Water Bottle",20]]],
+["Shakes",[["Vanilla Shake",70],["Choco Vanilla Shake",80],["Almond Shake",80],["Choco with Almond",100],["Oreo Shake",90],["Choco with Oreo",100]]]
+];
+const cart = {};
+const menu = document.getElementById('menu');
+groups.forEach(([group,items])=>{
+ const section=document.createElement('section'); section.innerHTML=`<h2>${group}</h2>`;
+ items.forEach(([name,price])=>{
+  const row=document.createElement('div'); row.className='item';
+  row.innerHTML=`<div><strong>${name}</strong><span class="price">₹${price}</span></div><div class="controls"><button aria-label="Remove">−</button><span class="qty">0</span><button aria-label="Add">+</button></div>`;
+  const buttons=row.querySelectorAll('button'), qty=row.querySelector('.qty');
+  buttons[0].onclick=()=>{cart[name]=Math.max(0,(cart[name]||0)-1);qty.textContent=cart[name];renderCart()};
+  buttons[1].onclick=()=>{cart[name]=(cart[name]||0)+1;qty.textContent=cart[name];renderCart()};
+  section.appendChild(row);
+ }); menu.appendChild(section);
+});
+function renderCart(){
+ const entries=Object.entries(cart).filter(([,q])=>q>0);
+ const prices=Object.fromEntries(groups.flatMap(g=>g[1]));
+ const total=entries.reduce((s,[n,q])=>s+prices[n]*q,0);
+ document.getElementById('cartItems').innerHTML=entries.length?entries.map(([n,q])=>`${n} × ${q} = ₹${prices[n]*q}`).join('<br>'):'ఇంకా items ఎంచుకోలేదు.';
+ document.getElementById('total').textContent='Total: ₹'+total;
+}
+function sendOrder(){
+ const entries=Object.entries(cart).filter(([,q])=>q>0);
+ if(!entries.length){alert('ముందుగా కనీసం ఒక item ఎంచుకోండి.');return}
+ const name=document.getElementById('customer').value.trim();
+ const phone=document.getElementById('phone').value.trim();
+ const address=document.getElementById('address').value.trim();
+ if(!name||!phone){alert('మీ పేరు, మొబైల్ నంబర్ ఇవ్వండి.');return}
+ const prices=Object.fromEntries(groups.flatMap(g=>g[1]));
+ const total=entries.reduce((s,[n,q])=>s+prices[n]*q,0);
+ let msg=`*PRAVO - NEW ORDER*%0AName: ${encodeURIComponent(name)}%0ACustomer phone: ${encodeURIComponent(phone)}%0A`;
+ msg+=`Order type: ${encodeURIComponent(document.getElementById('delivery').value)}%0AAddress: ${encodeURIComponent(address||'Not provided')}%0A%0A`;
+ entries.forEach(([n,q])=>{msg+=`${encodeURIComponent(n)} x ${q} = Rs.${prices[n]*q}%0A`});
+ msg+=`%0A*Total: Rs.${total}*`;
+ window.open('https://wa.me/919392143648?text='+msg,'_blank');
+}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+</script>
+</body>
+</html>
