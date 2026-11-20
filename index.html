@@ -84,6 +84,7 @@ function sendOrder(){
  msg+=`Order type: ${encodeURIComponent(document.getElementById('delivery').value)}%0AAddress: ${encodeURIComponent(address||'Not provided')}%0A%0A`;
  entries.forEach(([n,q])=>{msg+=`${encodeURIComponent(n)} x ${q} = Rs.${prices[n]*q}%0A`});
  msg+=`%0A*Total: Rs.${total}*`;
+ msg+='\n*Shop Location:* https://www.google.com/maps/search/?api=1&query=TIME+4+TEA+Jothi+Nagar+CHC+Government+Hospital+Husnabad';
  window.open('https://wa.me/919392143648?text='+msg,'_blank');
 }
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
